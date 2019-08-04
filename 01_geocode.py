@@ -17,7 +17,7 @@ data_path = conf['data_path']
 fehd_path = os.path.join(data_path,'work','00_fehd','output.json')
 fehd_data = _utils.read_json(fehd_path)
 restaurant_list = fehd_data['restaurant_list']
-#restaurant_list = restaurant_list[:5]
+restaurant_list = restaurant_list[:5]
 
 output_path_root = os.path.join(data_path,'work','01_geocode')
 
