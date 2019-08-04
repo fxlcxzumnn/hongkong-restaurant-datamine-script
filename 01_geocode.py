@@ -43,7 +43,7 @@ for restaurant in restaurant_list:
     )
     _utils.mkdirs(restaurant_path)
     
-    json_path = os.path.join(restaurant_path, 'geocode.py')
+    json_path = os.path.join(restaurant_path, 'geocode.json')
     if good_geocode_json(json_path):
         print('ignore good geocode, licno={licno}'.format(licno=licno))
         continue
