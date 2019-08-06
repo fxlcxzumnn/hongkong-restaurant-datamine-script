@@ -8,7 +8,7 @@ import googlemaps
 import time
 import geopy.distance
 
-VERSION = '1565104415'
+VERSION = '1565110382'
 TIMESTAMP = math.floor(datetime.datetime.now().timestamp())
 
 conf = _utils.conf
@@ -38,17 +38,6 @@ def find_geocode_place(merge_data, licno):
     geocode_en_list = geocode_json["geocode_en"]
     geocode_tc_list = geocode_json["geocode_tc"]
 
-    if      ( len(geocode_en_list) == 1 ) \
-        and ( len(geocode_tc_list) == 1 ) \
-        and (geocode_en_list[0]['place_id'] == geocode_tc_list[0]['place_id']):
-
-        place_data = get_place_data(geocode_en_list[0]['place_id'])
-        merge_data['geocode_en'] = geocode_en_list[0]
-        merge_data['geocode_tc'] = geocode_tc_list[0]
-        merge_data['place_en'] = place_data['place_en']
-        merge_data['place_tc'] = place_data['place_tc']
-        return True, geocode_json, None
-
     place_id_to_place_data_dict = {}
     for geocode in geocode_en_list+geocode_tc_list:
         place_id = geocode['place_id']
@@ -58,6 +47,19 @@ def find_geocode_place(merge_data, licno):
             and place_data['place_en']['result']['permanently_closed']:
             continue
         place_id_to_place_data_dict[place_id] = place_data
+
+    merge_data['place_id_to_place_data_dict'] = place_id_to_place_data_dict
+
+    if      ( len(geocode_en_list) == 1 ) \
+        and ( len(geocode_tc_list) == 1 ) \
+        and (geocode_en_list[0]['place_id'] == geocode_tc_list[0]['place_id']):
+
+        place_data = get_place_data(geocode_en_list[0]['place_id'])
+        merge_data['geocode_en'] = geocode_en_list[0]
+        merge_data['geocode_tc'] = geocode_tc_list[0]
+        merge_data['place_en'] = place_data['place_en']
+        merge_data['place_tc'] = place_data['place_tc']
+        return True, geocode_json, place_id_to_place_data_dict
 
     fehd_name_set = {fehd['SS_TC'].lower(), fehd['SS_EN'].lower()}
     match_name_place_id_list = []
@@ -69,6 +71,33 @@ def find_geocode_place(merge_data, licno):
         inter_name_set = fehd_name_set & place_name_set
         if len(inter_name_set) > 0:
             match_name_place_id_list.append(place_id)
+
+    if len(match_name_place_id_list) >= 1:
+        place_list = match_name_place_id_list
+        place_list = map(lambda i:place_id_to_place_data_dict[i],place_list)
+        place_list = filter(lambda i:'restaurant' in i['place_en']['result']['types'],place_list)
+        place_list = list(place_list)
+        if len(place_list) > 0:
+            match_name_place_id_list = map(lambda i:i['place_id'],place_list)
+            match_name_place_id_list = list(match_name_place_id_list)
+
+    if len(match_name_place_id_list) >= 1:
+        place_list = match_name_place_id_list
+        place_list = map(lambda i:place_id_to_place_data_dict[i],place_list)
+        place_list = filter(lambda i:'food' in i['place_en']['result']['types'],place_list)
+        place_list = list(place_list)
+        if len(place_list) > 0:
+            match_name_place_id_list = map(lambda i:i['place_id'],place_list)
+            match_name_place_id_list = list(match_name_place_id_list)
+
+    if len(match_name_place_id_list) >= 1:
+        place_list = match_name_place_id_list
+        place_list = map(lambda i:place_id_to_place_data_dict[i],place_list)
+        place_list = filter(lambda i:'point_of_interest' in i['place_en']['result']['types'],place_list)
+        place_list = list(place_list)
+        if len(place_list) > 0:
+            match_name_place_id_list = map(lambda i:i['place_id'],place_list)
+            match_name_place_id_list = list(match_name_place_id_list)
 
     if len(match_name_place_id_list) >= 1:
         latlong_list = match_name_place_id_list
@@ -88,7 +117,7 @@ def find_geocode_place(merge_data, licno):
                 break
             merge_data['place_en'] = place_data['place_en']
             merge_data['place_tc'] = place_data['place_tc']
-            return True, geocode_json, None
+            return True, geocode_json, place_id_to_place_data_dict
 
     match_name_place_id_list = []
     for place_id, place_data in place_id_to_place_data_dict.items():
@@ -105,6 +134,33 @@ def find_geocode_place(merge_data, licno):
             match_name_place_id_list.append(place_id)
 
     if len(match_name_place_id_list) >= 1:
+        place_list = match_name_place_id_list
+        place_list = map(lambda i:place_id_to_place_data_dict[i],place_list)
+        place_list = filter(lambda i:'restaurant' in i['place_en']['result']['types'],place_list)
+        place_list = list(place_list)
+        if len(place_list) > 0:
+            match_name_place_id_list = map(lambda i:i['place_id'],place_list)
+            match_name_place_id_list = list(match_name_place_id_list)
+
+    if len(match_name_place_id_list) >= 1:
+        place_list = match_name_place_id_list
+        place_list = map(lambda i:place_id_to_place_data_dict[i],place_list)
+        place_list = filter(lambda i:'food' in i['place_en']['result']['types'],place_list)
+        place_list = list(place_list)
+        if len(place_list) > 0:
+            match_name_place_id_list = map(lambda i:i['place_id'],place_list)
+            match_name_place_id_list = list(match_name_place_id_list)
+
+    if len(match_name_place_id_list) >= 1:
+        place_list = match_name_place_id_list
+        place_list = map(lambda i:place_id_to_place_data_dict[i],place_list)
+        place_list = filter(lambda i:'point_of_interest' in i['place_en']['result']['types'],place_list)
+        place_list = list(place_list)
+        if len(place_list) > 0:
+            match_name_place_id_list = map(lambda i:i['place_id'],place_list)
+            match_name_place_id_list = list(match_name_place_id_list)
+
+    if len(match_name_place_id_list) >= 1:
         latlong_list = match_name_place_id_list
         latlong_list = map(lambda i:place_id_to_place_data_dict[i],latlong_list)
         latlong_list = map(lambda i:i['place_en']['result']['geometry']['location'],latlong_list)
@@ -122,7 +178,7 @@ def find_geocode_place(merge_data, licno):
                 break
             merge_data['place_en'] = place_data['place_en']
             merge_data['place_tc'] = place_data['place_tc']
-            return True, geocode_json, None
+            return True, geocode_json, place_id_to_place_data_dict
     
     return False, geocode_json, place_id_to_place_data_dict
 
